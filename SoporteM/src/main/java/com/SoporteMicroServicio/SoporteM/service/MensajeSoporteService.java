@@ -1,6 +1,7 @@
 package com.SoporteMicroServicio.SoporteM.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -20,51 +21,50 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 
 public class MensajeSoporteService {
-    
+
     private final MensajeSoporteRepository mensajeSoporteRepository;
     private final TicketSoporteRepository ticketSoporteRepository;
 
-    public List<MensajeSoporte> listarPorTicket(Long idTicket){
-        return mensajeSoporteRepository.findByIdTicket(idTicket);
+    public List<MensajeSoporte> listarPorIdTicket(Long idTicket) {
+        return mensajeSoporteRepository.findByTicketSoporteIdTicket(idTicket);
     }
 
-    public MensajeSoporte obtenerPorId(Long idMensaje){
-        return mensajeSoporteRepository.findByIdMensaje(idMensaje.orElseThrow() -> ResourceNotFoundException("Mensaje no encontrado", idMensaje));
+    public MensajeSoporte obtenerMensajePorId(Long idMensaje) {
+        return mensajeSoporteRepository.findById(idMensaje)
+            .orElseThrow(() -> new ResourceNotFoundException("Mensaje", idMensaje));
     }
 
-    //Agregar mensaje a un ticket ya existente
-    public MensajeSoporte enviarMensaje(Long idTicket, MensajeSoporteDTO dto){
+    public MensajeSoporte enviarMensaje(Long idTicket, MensajeSoporteDTO dto) {
         log.info("Enviando mensaje al ticket id: {}", idTicket);
 
-        TicketSoporte ticket = ticketSoporteRepository.findByIdTicket(idTicket).orElseThrow(() -> ResourceNotFoundException("Ticket no encontrado", idTicket));
+        TicketSoporte ticket = ticketSoporteRepository.findById(idTicket)
+            .orElseThrow(() -> new ResourceNotFoundException("Ticket", idTicket));
 
-        if ("Cerrado".equals(ticket.getEstadoTicket())){
+        if ("CERRADO".equals(ticket.getEstadoTicket())) {
             throw new BusinessException("No se pueden enviar mensajes a un ticket cerrado");
         }
 
         MensajeSoporte mensaje = MensajeSoporte.builder()
-               .contenido(dto.getContenido())
-                .remitente(dto.getRemitente())
-                .tipoRemitente(dto.getTipoRemitente())
-                .fechaEnvio(LocalDateTime.now())
-                .ticket(ticket)
-                .build();
+            .contenido(dto.getContenido())
+            .remitente(dto.getRemitente())
+            .tipoRemitente(dto.getTipoRemitente())
+            .fechaEnvio(LocalDateTime.now())
+            .ticketSoporte(ticket)
+            .build();
 
-        return mensajeRepository.save(mensaje);
+        return mensajeSoporteRepository.save(mensaje);
     }
 
-    //Responder mensaje 
-    public MensajeSoporte responderMensaje(Long idMensajeOriginal, MensajeSoporteDTO dto){
+    public MensajeSoporte responderMensaje(Long idMensajeOriginal, MensajeSoporteDTO dto) {
         log.info("Respondiendo al mensaje {}", idMensajeOriginal);
-
-        MensajeSoporte original = obtenerPorId(idMensajeOriginal);
-        return enviarMensaje(original.getTicket().getIdTicket(), dto);
-
-        public void eliminarMensaje(Integer id) {
-        if (!mensajeRepository.existsById(id))
-            throw new ResourceNotFoundException("Mensaje", id);
-        mensajeRepository.deleteById(id);
+        MensajeSoporte original = obtenerMensajePorId(idMensajeOriginal);
+        return enviarMensaje(original.getTicketSoporte().getIdTicket(), dto);
     }
-    
-    
+
+    public void eliminarMensaje(Long id) {
+        if (!mensajeSoporteRepository.existsById(id))
+            throw new ResourceNotFoundException("Mensaje", id);
+        mensajeSoporteRepository.deleteById(id);
+    }
+
 }

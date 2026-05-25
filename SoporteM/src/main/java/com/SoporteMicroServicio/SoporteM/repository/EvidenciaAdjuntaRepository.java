@@ -8,9 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.EvidenciaAdjunta;
 
 @Repository
+public interface EvidenciaAdjuntaRepository extends JpaRepository<EvidenciaAdjunta, Long> {
 
-public interface  EvidenciaAdjuntaRepository extends JpaRepository<EvidenciaAdjunta, Long>{
+    List<EvidenciaAdjunta> findByTicketSoporteIdTicket(Long idTicket);
 
-    List<EvidenciaAdjunta> findByTicketIdTicket(Long idTicket);
-    
 }

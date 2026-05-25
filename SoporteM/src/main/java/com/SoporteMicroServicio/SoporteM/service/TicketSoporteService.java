@@ -1,6 +1,8 @@
 package com.SoporteMicroServicio.SoporteM.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -9,6 +11,8 @@ import com.SoporteMicroServicio.SoporteM.dto.CrearTicketDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
 import com.SoporteMicroServicio.SoporteM.feign.UsuarioFeignClient;
+import com.SoporteMicroServicio.SoporteM.model.HistorialEstadoTicket;
+import com.SoporteMicroServicio.SoporteM.model.PersonalSoporte;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.repository.HistorialEstadoTicketRepository;
 import com.SoporteMicroServicio.SoporteM.repository.PersonalSoporteRepository;
@@ -28,148 +32,138 @@ public class TicketSoporteService {
     private final PersonalSoporteRepository personalSoporteRepository;
     private final UsuarioFeignClient usuarioFeignClient;
 
-    //Consultas 
-
-    public List<TicketSoporte> listarTodosLosTickets(){
+    public List<TicketSoporte> listarTodosLosTickets() {
         log.debug("Listando todos los tickets de soporte");
         return ticketSoporteRepository.findAll();
     }
 
-    public TicketSoporte obtenerTicketPorId(Long idTicket){
+    public TicketSoporte obtenerTicketPorId(Long idTicket) {
         log.debug("Buscando ticket con id: {}", idTicket);
-        return ticketSoporteRepository.findByIdTicket(idTicket)
-            .orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado por su id"));
+        return ticketSoporteRepository.findById(idTicket)
+            .orElseThrow(() -> new ResourceNotFoundException("Ticket", idTicket));
     }
 
-    public List<TicketSoporte> listarPorCliente(Long runCliente){
+    public List<TicketSoporte> listarPorCliente(Long runCliente) {
         return ticketSoporteRepository.findByRunCliente(runCliente);
     }
 
-    public List<TicketSoporte> listarPorEstado(String estado){
-        return ticketSoporteRepository.findByEstado(estado);
+    public List<TicketSoporte> listarPorEstado(String estado) {
+        return ticketSoporteRepository.findByEstadoTicket(estado);
     }
 
-    //Crear ticket
-    public TicketSoporte crearTicket(CrearTicketDTO dto){
-        log.info("Creando ticker para cliente RUT: {}", dto.getRunCliente());
+    public TicketSoporte crearTicket(CrearTicketDTO dto) {
+        log.info("Creando ticket para cliente RUT: {}", dto.getRunCliente());
 
-        //Validamos el usuario consultando al microservicio de usuario
         Map<String, Object> usuario = usuarioFeignClient.obtenerUsuarioPorRut(dto.getRunCliente());
 
-        if("Usuario no disponible".equals(usuario.get(nombre))){
+        if ("Usuario no disponible".equals(usuario.get("nombre"))) {
             log.error("No se pudo validar el cliente, rut: {}", dto.getRunCliente());
-            throw new BusinessException("No se pudo crear el ticket: cliente no validado")
+            throw new BusinessException("No se pudo crear el ticket: cliente no validado");
         }
 
-        if ("Inactivo".equals(usuario.get("estadoUsuario"))){
+        if ("Inactivo".equals(usuario.get("estadoUsuario"))) {
             throw new BusinessException("No se pudo crear el ticket: cliente inactivo");
-        {
-
-            TicketSoporte ticket = TicketSoporte.builder()
-                .runCliente(dto.getRunCliente())
-                .idPedido(dto.getIdPedido())
-                .asunto(dto.getAsunto())
-                .descripcion(dto.getDescripcion())
-                .tipoSolicitud(dto.getTipoSolicitud())
-                .canal(dto.getCanal())
-                .prioridad(dto.getPrioridad())
-                .estadoTicket("ABIERTO")
-                .fechaCreacion(LocalDateTime.now())
-                .build();
-            return ticketSoporteRepository.save(ticket);
         }
 
-        TicketSoporte guardado = ticketRepository.save(ticket);
+        TicketSoporte ticket = TicketSoporte.builder()
+            .runCliente(dto.getRunCliente())
+            .idPedido(dto.getIdPedido())
+            .asunto(dto.getAsunto())
+            .descripcion(dto.getDescripcion())
+            .tipoSolicitud(dto.getTipoSolicitud())
+            .canal(dto.getCanal())
+            .prioridad(dto.getPrioridad())
+            .estadoTicket("ABIERTO")
+            .fechaCreacion(LocalDateTime.now())
+            .build();
 
-        registrarCambioEstado(guardado, null, "Abierto", "Sistema");
-
-        log.info("Ticket creado: id: {}", guardado.getIdTicket());
+        TicketSoporte guardado = ticketSoporteRepository.save(ticket);
+        registrarCambioEstado(guardado, null, "ABIERTO", "Sistema");
+        log.info("Ticket creado id: {}", guardado.getIdTicket());
         return guardado;
     }
 
-    public TicketSoporte clasificarSolicitud(Long idTicket, String nuevaPrioridad, Long idPersonal){
+    public TicketSoporte clasificarSolicitud(Long idTicket, String nuevaPrioridad, Long idPersonal) {
         log.info("Clasificando ticket {} prioridad: {} personal {}", idTicket, nuevaPrioridad, idPersonal);
 
-        TicketSoporte ticket = obtenerPorIdTicket(idTicket);
+        TicketSoporte ticket = obtenerTicketPorId(idTicket);
 
-        if (nuevaPrioridad != null && personalRepository.findByIdPerosonal(idPersonal.orElseThrow(() -> new ResourceNotFoundException("Personal", idPersonal)));)
+        if (nuevaPrioridad != null) {
+            ticket.setPrioridad(nuevaPrioridad);
+        }
+
+        if (idPersonal != null) {
+            PersonalSoporte personal = personalSoporteRepository.findById(idPersonal)
+                .orElseThrow(() -> new ResourceNotFoundException("Personal", idPersonal));
+
+            if ("INACTIVO".equals(personal.getEstado())) {
+                throw new BusinessException("No se puede asignar ticket al personal inactivo");
+            }
+
+            ticket.setPersonalAsignado(personal);
+        }
+
+        return ticketSoporteRepository.save(ticket);
     }
 
-    if("Inactivo".equals(personal.getEstadoPersonal())){
-        throw new BusinessException("No se puede asignar ticket al personal inactivo ");
-
-    }
-
-    ticket.setPersonalAsignado(personal);
-}
-
-return ticketRepository.save(ticket);
-
-public TicketSoporte cambiarEstado(Long idTicket, CambiarEstadoDTO dto) {
+    public TicketSoporte cambiarEstado(Long idTicket, CambiarEstadoDTO dto) {
         log.info("Cambiando estado del ticket {} a {}", idTicket, dto.getNuevoEstado());
 
-        TicketSoporte ticket = obtenerPorIdTicket(idTicket);
+        TicketSoporte ticket = obtenerTicketPorId(idTicket);
         String estadoAnterior = ticket.getEstadoTicket();
         String estadoNuevo = dto.getNuevoEstado();
 
-        //No se puede cambiar el estado de un ticket si ya estado cerrado
-
-        if("Cerrado".equals(estadoAnterior)){
-            throw new BusinessException("No se puede cambiar el estado de un ticket ya cerrrado");
+        if ("CERRADO".equals(estadoAnterior)) {
+            throw new BusinessException("No se puede cambiar el estado de un ticket ya cerrado");
         }
 
-        //No cambiar al mismo estado
-        if(estadoAnterior.equals(estadoNuevo)){
-            throw new BusinessException("El ticket ya se encuentra en ese estadp" + estadoNuevo);
+        if (estadoAnterior.equals(estadoNuevo)) {
+            throw new BusinessException("El ticket ya se encuentra en ese estado: " + estadoNuevo);
         }
 
         ticket.setEstadoTicket(estadoNuevo);
-        TicketSoporte guardado = ticketRepository.save(ticket);
-
+        TicketSoporte guardado = ticketSoporteRepository.save(ticket);
         registrarCambioEstado(guardado, estadoAnterior, estadoNuevo, dto.getUsuarioResponsable());
-
         return guardado;
     }
 
- public TicketSoporte cerrarTicket(Long idTicket, String usuarioResponsable) {
+    public TicketSoporte cerrarTicket(Long idTicket, String usuarioResponsable) {
         log.info("Cerrando ticket {}", idTicket);
 
-        TicketSoporte ticket = obtenerPorId(idTicket);
+        TicketSoporte ticket = obtenerTicketPorId(idTicket);
 
-        if ("Cerrado".equals(ticket.getEstadoTicket())) {
-            throw new BusinessException("El ticket ya está cerrado.");
+        if ("CERRADO".equals(ticket.getEstadoTicket())) {
+            throw new BusinessException("El ticket ya esta cerrado.");
         }
 
         String estadoAnterior = ticket.getEstadoTicket();
-        ticket.setEstadoTicket("Cerrado");
+        ticket.setEstadoTicket("CERRADO");
         ticket.setFechaCierre(LocalDateTime.now());
 
-        TicketSoporte guardado = ticketRepository.save(ticket);
-        registrarCambioEstado(guardado, estadoAnterior, "Cerrado", usuarioResponsable);
-
+        TicketSoporte guardado = ticketSoporteRepository.save(ticket);
+        registrarCambioEstado(guardado, estadoAnterior, "CERRADO", usuarioResponsable);
         log.info("Ticket {} cerrado exitosamente", idTicket);
         return guardado;
     }
 
     public void eliminarTicketSoporte(Long id) {
         log.warn("Eliminando ticket id: {}", id);
-        if (!ticketRepository.existsById(id)) {
+        if (!ticketSoporteRepository.existsById(id)) {
             throw new ResourceNotFoundException("Ticket", id);
         }
-        ticketRepository.deleteByIdTicket(id);
+        ticketSoporteRepository.deleteById(id);
     }
 
-
-    private void registrarCambioEstado(TicketSoporte ticket, String anterior,
-                                        String nuevo, String responsable) {
+    private void registrarCambioEstado(TicketSoporte ticket, String anterior, String nuevo, String responsable) {
         HistorialEstadoTicket historial = HistorialEstadoTicket.builder()
-                .estadoAnterior(anterior)
-                .estadoNuevo(nuevo)
-                .fechaCambio(LocalDateTime.now())
-                .usuarioResponsable(responsable)
-                .ticket(ticket)
-                .build();
-        historialRepository.save(historial);
-        log.debug("Historial registrado: {} → {}", anterior, nuevo);
+            .estadoAnterior(anterior)
+            .estadoNuevo(nuevo)
+            .fechaCambio(LocalDateTime.now())
+            .usuarioResponsable(responsable)
+            .ticketSoporte(ticket)
+            .build();
+        historialEstadoTicketRepository.save(historial);
+        log.debug("Historial registrado: {} -> {}", anterior, nuevo);
     }
+
 }

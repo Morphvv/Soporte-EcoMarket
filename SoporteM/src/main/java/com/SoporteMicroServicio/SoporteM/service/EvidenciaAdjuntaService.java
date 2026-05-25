@@ -1,6 +1,7 @@
 package com.SoporteMicroServicio.SoporteM.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -23,36 +24,37 @@ public class EvidenciaAdjuntaService {
     private final EvidenciaAdjuntaRepository evidenciaAdjuntaRepository;
     private final TicketSoporteRepository ticketSoporteRepository;
 
-    public List<EvidenciaAdjunta> listarPorIdTicket(Long idTicket){
-        return evidenciaAdjuntaRepository.findByIdTicket(idTicket);
+    public List<EvidenciaAdjunta> listarPorIdTicket(Long idTicket) {
+        return evidenciaAdjuntaRepository.findByTicketSoporteIdTicket(idTicket);
     }
 
-    public EvidenciaAdjunta obtenerPorIdEvidencia(Long idEvidencia){
-        return evidenciaAdjuntaRepository.findByIdEvidencia(idEvidencia).orElseThrow(() -> new ResourceNotFoundException("Evidencia", id))''
+    public EvidenciaAdjunta obtenerEvidenciaPorId(Long idEvidencia) {
+        return evidenciaAdjuntaRepository.findById(idEvidencia)
+            .orElseThrow(() -> new ResourceNotFoundException("Evidencia", idEvidencia));
     }
 
-    //Adjuntar archivo a un ticket 
-    public EvidenciaAdjunta adjuntarEvidencia(Long idTicket, EvidenciaAdjuntaDTO dto){
-        log.info("Adjuntado evidencia al ticket {}", idTicket);
+    public EvidenciaAdjunta adjuntarEvidencia(Long idTicket, EvidenciaAdjuntaDTO dto) {
+        log.info("Adjuntando evidencia al ticket {}", idTicket);
 
-        TicketSoporte ticket = ticketSoporteRepository.findByIdTicket(idTicket).orElseThrow(() -> new ResourceNotFoundException("Ticket no encontrado", idTicket));
+        TicketSoporte ticket = ticketSoporteRepository.findById(idTicket)
+            .orElseThrow(() -> new ResourceNotFoundException("Ticket", idTicket));
 
-            EvidenciaAdjunta evidencia = EvidenciaAdjunta.builder()
-                .nombreArchivo(dto.getNombreArchivo())
-                .tipoArchivo(dto.getTipoArchivo())
-                .urlArchivo(dto.getUrlArchivo())
-                .fechaCarga(LocalDateTime.now())
-                .ticket(ticket)
-                .build();
+        EvidenciaAdjunta evidencia = EvidenciaAdjunta.builder()
+            .nombreArchivo(dto.getNombreArchivo())
+            .tipoArchivo(dto.getTipoArchivo())
+            .urlArchivo(dto.getUrlArchivo())
+            .fechaCarga(LocalDateTime.now())
+            .ticketSoporte(ticket)
+            .build();
 
-        return evidenciaRepository.save(evidencia);
+        return evidenciaAdjuntaRepository.save(evidencia);
     }
 
-    //Eliminar evidencia adjunta
-    public void eliminarEvidencia(Integer id) {
+    public void eliminarEvidencia(Long id) {
         log.info("Eliminando evidencia {}", id);
-        if (!evidenciaRepository.existsById(id))
+        if (!evidenciaAdjuntaRepository.existsById(id))
             throw new ResourceNotFoundException("Evidencia", id);
-        evidenciaRepository.deleteById(id);
+        evidenciaAdjuntaRepository.deleteById(id);
     }
+
 }

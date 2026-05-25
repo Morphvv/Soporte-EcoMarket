@@ -8,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.HistorialEstadoTicket;
 
 @Repository
+public interface HistorialEstadoTicketRepository extends JpaRepository<HistorialEstadoTicket, Long> {
 
-public interface HistorialEstadoTicketRepository extends JpaRepository<HistorialEstadoTicket, Long>{
-    
-    List<HistorialEstadoTicket> findByTicketIdTicketByFechaCambio(Long idTicket);
+    List<HistorialEstadoTicket> findByTicketSoporteIdTicketOrderByFechaCambioAsc(Long idTicket);
+
 }

@@ -8,7 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.ResolucionSoporte;
 
 @Repository
-public interface  ResolucionSoporteRepository extends JpaRepository<ResolucionSoporte, Long>{
+public interface ResolucionSoporteRepository extends JpaRepository<ResolucionSoporte, Long> {
 
-    Optional<ResolucionSoporte> findByTicketIdTicket(Long idTicket);
+    Optional<ResolucionSoporte> findByTicketSoporteIdTicket(Long idTicket);
+
 }

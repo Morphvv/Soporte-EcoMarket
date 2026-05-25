@@ -8,9 +8,8 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.MensajeSoporte;
 
 @Repository
+public interface MensajeSoporteRepository extends JpaRepository<MensajeSoporte, Long> {
 
-public interface  MensajeSoporteRepository extends JpaRepository<MensajeSoporte, Long> {
+    List<MensajeSoporte> findByTicketSoporteIdTicket(Long idTicket);
 
-    List<MensajeSoporte> findByTicketIdTicket(Long idTicket);
-    
 }

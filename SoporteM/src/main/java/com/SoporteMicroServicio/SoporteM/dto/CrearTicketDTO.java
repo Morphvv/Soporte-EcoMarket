@@ -1,8 +1,10 @@
 package com.SoporteMicroServicio.SoporteM.dto;
 
-import org.antlr.v4.runtime.misc.NotNull;
-import org.hibernate.annotations.processing.Pattern;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -23,17 +25,15 @@ public class CrearTicketDTO {
     private String descripcion;
 
     @NotBlank(message = "El tipo de solicitud es obligatoria")
-    @Pattern(regexp = "CONSULTA/RECLAMO/DEVOLUCION/SOPORTE_TECNICO", message = "Tipo de solicitud invalido")
+    @Pattern(regexp = "CONSULTA|RECLAMO|DEVOLUCION|SOPORTE_TECNICO", message = "Tipo de solicitud invalido")
     private String tipoSolicitud;
 
     @NotBlank(message = "El canal es obligatorio")
-    @Pattern(regexp = "WEB|EMAIL|TELEFONO|CHAT",
-             message = "Canal inválido")
+    @Pattern(regexp = "WEB|EMAIL|TELEFONO|CHAT", message = "Canal invalido")
     private String canal;
 
     @NotBlank(message = "La prioridad es obligatoria")
-    @Pattern(regexp = "BAJA|MEDIA|ALTA|CRITICA",
-             message = "Prioridad inválida")
+    @Pattern(regexp = "BAJA|MEDIA|ALTA|CRITICA", message = "Prioridad invalida")
     private String prioridad;
-    
+
 }

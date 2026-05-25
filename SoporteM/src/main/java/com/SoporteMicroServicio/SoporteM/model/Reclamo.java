@@ -25,7 +25,7 @@ import lombok.ToString;
 @Builder
 
 public class Reclamo {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idReclamo;
@@ -36,20 +36,21 @@ public class Reclamo {
     @Column(name = "id_producto", nullable = false)
     private Long idProducto;
 
-    @Column(nullable= false, length= 200)
+    @Column(nullable = false, length = 200)
     private String motivo;
 
-    @Column(nullable = false, length= 500)
+    @Column(nullable = false, length = 500)
     private String descripcion;
 
-    @Column(name = "estado_reclamo", nullable= false, length= 30)
+    @Column(name = "estado_reclamo", nullable = false, length = 30)
     private String estadoReclamo;
 
-    @Column(name = "fecha_reclamo", nullable= false)
-    private LocalDateTime fechaRecalamo;
+    @Column(name = "fecha_reclamo", nullable = false)
+    private LocalDateTime fechaReclamo;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_id", nullable= false, unique= true)
+    @JoinColumn(name = "ticket_id", nullable = false, unique = true)
     @ToString.Exclude
     private TicketSoporte ticketSoporte;
+
 }

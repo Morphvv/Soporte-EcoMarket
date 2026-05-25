@@ -9,10 +9,9 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.SolicitudDevolucion;
 
 @Repository
+public interface SolicitudDevolucionRepository extends JpaRepository<SolicitudDevolucion, Long> {
 
-public interface SolicitudDevolucionRepository extends  JpaRepository<SolicitudDevolucion, Long>{
-
-    Optional<SolicitudDevolucion> findByTicketIdTicket(Long idTicket);
+    Optional<SolicitudDevolucion> findByTicketSoporteIdTicket(Long idTicket);
     List<SolicitudDevolucion> findByEstadoSolicitud(String estadoSolicitud);
-    
+
 }

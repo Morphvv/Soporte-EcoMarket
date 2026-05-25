@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@Table (name = "hisorial_estado_ticket")
+@Table(name = "historial_estado_ticket")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,18 +33,18 @@ public class HistorialEstadoTicket {
     @Column(name = "estado_anterior", length = 30)
     private String estadoAnterior;
 
-    @Column(name = "estado_nuevo", nullable= false, length= 30)
+    @Column(name = "estado_nuevo", nullable = false, length = 30)
     private String estadoNuevo;
 
-    @Column(name = "fecha_cambio", nullable= false)
+    @Column(name = "fecha_cambio", nullable = false)
     private LocalDateTime fechaCambio;
 
-    @Column(name = "usuario_responsable", nullable= false, length= 100)
+    @Column(name = "usuario_responsable", nullable = false, length = 100)
     private String usuarioResponsable;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_ticket", nullable= false)
+    @JoinColumn(name = "id_ticket", nullable = false)
     @ToString.Exclude
     private TicketSoporte ticketSoporte;
-    
+
 }

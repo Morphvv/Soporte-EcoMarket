@@ -1,7 +1,10 @@
 package com.SoporteMicroServicio.SoporteM.dto;
 
-import org.antlr.v4.runtime.misc.NotNull;
-
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -12,7 +15,7 @@ public class SolicitudDevolucionDTO {
     private Long idPedido;
 
     @NotNull(message = "El id del producto es obligatorio")
-    @Positive 
+    @Positive
     private Long idProducto;
 
     @NotNull(message = "La cantidad es obligatoria")
@@ -22,5 +25,5 @@ public class SolicitudDevolucionDTO {
     @NotBlank(message = "El motivo es obligatorio")
     @Size(min = 5, max = 300)
     private String motivo;
-    
+
 }

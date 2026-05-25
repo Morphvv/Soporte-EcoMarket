@@ -9,10 +9,9 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.Reclamo;
 
 @Repository
+public interface ReclamoRepository extends JpaRepository<Reclamo, Long> {
 
-public interface  ReclamoRepository extends JpaRepository<Reclamo, Long>{
-
-    Optional<Reclamo> findByTicketIdTicket(Long idTicket);
+    Optional<Reclamo> findByTicketSoporteIdTicket(Long idTicket);
     List<Reclamo> findByEstadoReclamo(String estadoReclamo);
-    
+
 }

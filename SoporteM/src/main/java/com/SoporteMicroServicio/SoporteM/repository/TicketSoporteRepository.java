@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 
 @Repository
+public interface TicketSoporteRepository extends JpaRepository<TicketSoporte, Long> {
 
-public interface  TicketSoporteRepository extends JpaRepository<TicketSoporte, Long>{
-    
     List<TicketSoporte> findByRunCliente(Long runCliente);
     List<TicketSoporte> findByEstadoTicket(String estadoTicket);
     List<TicketSoporte> findByPrioridad(String prioridad);
-    List<TicketSoporte> findByPersonalAsignadoRutPersonal(Long idPersonalS);
+    List<TicketSoporte> findByPersonalAsignadoRutPersonalS(Long rutPersonalS);
+
 }

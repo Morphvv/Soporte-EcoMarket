@@ -1,2 +1,2 @@
-//Funciona en java 25
+//Funciona en java 21
 //Juan Pablo Jofre

@@ -2,7 +2,6 @@ package com.SoporteMicroServicio.SoporteM.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -34,18 +33,18 @@ public class MensajeSoporte {
     @Column(nullable = false, length = 1000)
     private String contenido;
 
-    @Column(nullable = false, length= 100)
+    @Column(nullable = false, length = 100)
     private String remitente;
 
-    @Column(name = "tipo_remitente", nullable= = false, length = 30)
+    @Column(name = "tipo_remitente", nullable = false, length = 30)
     private String tipoRemitente;
 
-    @Column(name = "fecha_envio", nullable= false)
+    @Column(name = "fecha_envio", nullable = false)
     private LocalDateTime fechaEnvio;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_id", nullable= false)
+    @JoinColumn(name = "ticket_id", nullable = false)
     @ToString.Exclude
     private TicketSoporte ticketSoporte;
-    
+
 }

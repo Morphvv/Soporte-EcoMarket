@@ -1,5 +1,7 @@
 package com.SoporteMicroServicio.SoporteM.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
@@ -17,14 +19,14 @@ public class HistorialEstadoTicketService {
 
     private final HistorialEstadoTicketRepository historialEstadoTicketRepository;
 
-    public final HistorialEstadoTicket listarPorIdTicket(Long idTicket){
-        log.debug("Listadno historial del ticket {}", idTicket);
-        return historialEstadoTicketRepository.findByIdTicket(idTicket).orElseThrow(() -> new ResourveNotFoundException("Historial de estado del ticket no encontrado", idTicket));
+    public List<HistorialEstadoTicket> listarPorIdTicket(Long idTicket) {
+        log.debug("Listando historial del ticket {}", idTicket);
+        return historialEstadoTicketRepository.findByTicketSoporteIdTicketOrderByFechaCambioAsc(idTicket);
     }
 
-    public HistorialEstadoTicket obtenerPorId(Integer id) {
-        return historialRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Historial", id));
+    public HistorialEstadoTicket obtenerHistorialPorId(Long id) {
+        return historialEstadoTicketRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Historial", id));
     }
-    
+
 }
