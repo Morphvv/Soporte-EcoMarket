@@ -127,9 +127,15 @@ class SolicitudDevolucionServiceTest {
     void rechazarSolicitud(){
         SolicitudDevolucion solicitud = SolicitudDevolucion.builder()
                 .idSolicitudD(1L).estadoSolicitud("PENDIENTE").build();
-        
-        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+        SolicitudDevolucion rechazada = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).estadoSolicitud("RECHAZADA").build();
 
-        assertThrows(BusinessException.class, () -> solicitudDevolucionService.rechazarDevolucion(1L));
+        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+        when(solicitudDevolucionRepository.save(any(SolicitudDevolucion.class))).thenReturn(rechazada);
+
+        SolicitudDevolucion resultado = solicitudDevolucionService.rechazarDevolucion(1L);
+
+        assertEquals("RECHAZADA", resultado.getEstadoSolicitud());
+        verify(solicitudDevolucionRepository, times(1)).save(any(SolicitudDevolucion.class));
     }
 }
