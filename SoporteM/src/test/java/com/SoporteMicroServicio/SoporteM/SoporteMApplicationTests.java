@@ -18,4 +18,12 @@ class SoporteMApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void main_ejecuta() {
+		SoporteMApplication.main(new String[]{
+			"--spring.profiles.active=test",
+			"--spring.main.web-application-type=none"
+		});
+	}
+
 }

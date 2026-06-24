@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.SoporteMicroServicio.SoporteM.model.HistorialEstadoTicket;
 import com.SoporteMicroServicio.SoporteM.service.HistorialEstadoTicketService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("api/v1/historialEstadoTicket")
 @RequiredArgsConstructor
+@Tag(name = "Historial de Estados", description = "Consulta del historial de cambios de estado de tickets")
 
 public class HistorialEstadoTicketController {
 

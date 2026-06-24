@@ -16,12 +16,14 @@ import com.SoporteMicroServicio.SoporteM.dto.EvidenciaAdjuntaDTO;
 import com.SoporteMicroServicio.SoporteM.model.EvidenciaAdjunta;
 import com.SoporteMicroServicio.SoporteM.service.EvidenciaAdjuntaService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("api/v1/evidenciaAdjunta")
 @RequiredArgsConstructor
+@Tag(name = "Evidencias Adjuntas", description = "Gestión de archivos adjuntos en tickets de soporte")
 
 public class EvidenciaAdjuntaController {
 

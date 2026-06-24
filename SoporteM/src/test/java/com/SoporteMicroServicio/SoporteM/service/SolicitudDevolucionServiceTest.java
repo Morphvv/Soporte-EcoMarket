@@ -138,4 +138,57 @@ class SolicitudDevolucionServiceTest {
         assertEquals("RECHAZADA", resultado.getEstadoSolicitud());
         verify(solicitudDevolucionRepository, times(1)).save(any(SolicitudDevolucion.class));
     }
+
+    @Test
+    void aprobarSolicitud_productoInvalido() {
+        SolicitudDevolucion solicitud = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).idProducto(null).cantidad(null).estadoSolicitud("PENDIENTE").build();
+
+        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+
+        assertThrows(BusinessException.class, () -> solicitudDevolucionService.aprobarSolicitud(1L));
+    }
+
+    @Test
+    void rechazarSolicitud_noEsPendiente() {
+        SolicitudDevolucion solicitud = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).estadoSolicitud("APROBADA").build();
+
+        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+
+        assertThrows(BusinessException.class, () -> solicitudDevolucionService.rechazarDevolucion(1L));
+    }
+
+    @Test
+    void validarProducto_productoNulo() {
+        SolicitudDevolucion solicitud = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).idProducto(null).cantidad(2).estadoSolicitud("PENDIENTE").build();
+
+        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+
+        Boolean resultado = solicitudDevolucionService.validarProducto(1L);
+        assertEquals(false, resultado);
+    }
+
+    @Test
+    void validarProducto_cantidadNula() {
+        SolicitudDevolucion solicitud = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).idProducto(5L).cantidad(null).estadoSolicitud("PENDIENTE").build();
+
+        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+
+        Boolean resultado = solicitudDevolucionService.validarProducto(1L);
+        assertEquals(false, resultado);
+    }
+
+    @Test
+    void validarProducto_cantidadCero() {
+        SolicitudDevolucion solicitud = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).idProducto(5L).cantidad(0).estadoSolicitud("PENDIENTE").build();
+
+        when(solicitudDevolucionRepository.findById(1L)).thenReturn(Optional.of(solicitud));
+
+        Boolean resultado = solicitudDevolucionService.validarProducto(1L);
+        assertEquals(false, resultado);
+    }
 }

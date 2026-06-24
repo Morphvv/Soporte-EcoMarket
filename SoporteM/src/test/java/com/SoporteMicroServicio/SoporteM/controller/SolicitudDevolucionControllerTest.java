@@ -109,4 +109,28 @@ class SolicitudDevolucionControllerTest {
     mockMvc.perform(put("/api/v1/solicitudDevolucion/rechazar/1"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void listarPorId_ok() throws Exception {
+        SolicitudDevolucion s = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).estadoSolicitud("PENDIENTE").build();
+
+        when(solicitudDevolucionService.obtenerPorIdDevolucion(1L)).thenReturn(s);
+
+        mockMvc.perform(get("/api/v1/solicitudDevolucion/listar/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.idSolicitudD").value(1));
+    }
+
+    @Test
+    void rechazarDevolucion_ok() throws Exception {
+        SolicitudDevolucion rechazada = SolicitudDevolucion.builder()
+                .idSolicitudD(1L).estadoSolicitud("RECHAZADA").build();
+
+        when(solicitudDevolucionService.rechazarDevolucion(1L)).thenReturn(rechazada);
+
+        mockMvc.perform(put("/api/v1/solicitudDevolucion/rechazar/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.estadoSolicitud").value("RECHAZADA"));
+    }
 }

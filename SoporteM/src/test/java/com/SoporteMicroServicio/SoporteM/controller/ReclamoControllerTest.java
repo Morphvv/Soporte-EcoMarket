@@ -105,5 +105,30 @@ class ReclamoControllerTest {
             .param("nuevoEstado", "INVALIDA"))
             .andExpect(status().isBadRequest());
     }
-    
+
+    @Test
+    void revisarReclamo_ok() throws Exception {
+        Reclamo revisado = Reclamo.builder()
+                .idReclamo(1L).estadoReclamo("REVISADO").build();
+
+        when(reclamoService.revisarReclamo(1L)).thenReturn(revisado);
+
+        mockMvc.perform(put("/api/v1/reclamo/revisar/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.estadoReclamo").value("REVISADO"));
+    }
+
+    @Test
+    void actualizarEstado_ok() throws Exception {
+        Reclamo resuelto = Reclamo.builder()
+                .idReclamo(1L).estadoReclamo("RESUELTO").build();
+
+        when(reclamoService.actualizarEstado(1L, "RESUELTO")).thenReturn(resuelto);
+
+        mockMvc.perform(put("/api/v1/reclamo/actualizar/1")
+                .param("nuevoEstado", "RESUELTO"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.estadoReclamo").value("RESUELTO"));
+    }
+
 }

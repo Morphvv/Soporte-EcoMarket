@@ -131,4 +131,10 @@ class PersonalSoporteControllerTest {
         mockMvc.perform(delete("/api/v1/personalSoporte/eliminar/99"))
             .andExpect(status().isNotFound());
     }
+
+    @Test
+    void eliminarPersonal_exitoso() throws Exception {
+        mockMvc.perform(delete("/api/v1/personalSoporte/eliminar/12345678"))
+            .andExpect(status().isNoContent());
+    }
 }

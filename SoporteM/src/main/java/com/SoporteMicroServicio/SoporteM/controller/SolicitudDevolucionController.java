@@ -17,6 +17,7 @@ import com.SoporteMicroServicio.SoporteM.dto.SolicitudDevolucionDTO;
 import com.SoporteMicroServicio.SoporteM.model.SolicitudDevolucion;
 import com.SoporteMicroServicio.SoporteM.service.SolicitudDevolucionService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("api/v1/solicitudDevolucion")
 @RequiredArgsConstructor
+@Tag(name = "Solicitudes de Devolución", description = "Gestión de solicitudes de devolución de productos")
 
 public class SolicitudDevolucionController {
 

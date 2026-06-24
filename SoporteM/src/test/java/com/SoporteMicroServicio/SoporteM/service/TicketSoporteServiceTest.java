@@ -24,6 +24,7 @@ import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
 import com.SoporteMicroServicio.SoporteM.feign.UsuarioFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.HistorialEstadoTicket;
+import com.SoporteMicroServicio.SoporteM.model.PersonalSoporte;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.repository.HistorialEstadoTicketRepository;
 import com.SoporteMicroServicio.SoporteM.repository.PersonalSoporteRepository;
@@ -271,5 +272,88 @@ class TicketSoporteServiceTest {
         when(ticketSoporteRepository.existsById(99L)).thenReturn(false);
 
         assertThrows(ResourceNotFoundException.class, () -> ticketSoporteService.eliminarTicketSoporte(99L));
+    }
+
+    @Test
+    void clasificarSolicitud_cambiaPrioridad() {
+        TicketSoporte ticket = TicketSoporte.builder()
+                .idTicket(1L).estadoTicket("ABIERTO").prioridad("MEDIA").build();
+
+        when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(ticketSoporteRepository.save(any(TicketSoporte.class))).thenReturn(ticket);
+
+        TicketSoporte resultado = ticketSoporteService.clasificarSolicitud(1L, "ALTA", null);
+
+        assertNotNull(resultado);
+        verify(ticketSoporteRepository, times(1)).save(any(TicketSoporte.class));
+    }
+
+    @Test
+    void clasificarSolicitud_asignaPersonal() {
+        TicketSoporte ticket = TicketSoporte.builder()
+                .idTicket(1L).estadoTicket("ABIERTO").build();
+        PersonalSoporte personal = PersonalSoporte.builder()
+                .rutPersonalS(12345678L).nombre("Ana").estado("ACTIVO").build();
+
+        when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(personalSoporteRepository.findById(12345678L)).thenReturn(Optional.of(personal));
+        when(ticketSoporteRepository.save(any(TicketSoporte.class))).thenReturn(ticket);
+
+        TicketSoporte resultado = ticketSoporteService.clasificarSolicitud(1L, null, 12345678L);
+
+        assertNotNull(resultado);
+        verify(personalSoporteRepository, times(1)).findById(12345678L);
+    }
+
+    @Test
+    void clasificarSolicitud_personalInactivo() {
+        TicketSoporte ticket = TicketSoporte.builder()
+                .idTicket(1L).estadoTicket("ABIERTO").build();
+        PersonalSoporte personal = PersonalSoporte.builder()
+                .rutPersonalS(12345678L).estado("INACTIVO").build();
+
+        when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(personalSoporteRepository.findById(12345678L)).thenReturn(Optional.of(personal));
+
+        assertThrows(BusinessException.class, () ->
+            ticketSoporteService.clasificarSolicitud(1L, null, 12345678L));
+    }
+
+    @Test
+    void listarPorCliente() {
+        TicketSoporte ticket = TicketSoporte.builder()
+                .idTicket(1L).runCliente(12345678L).estadoTicket("ABIERTO").build();
+
+        when(ticketSoporteRepository.findByRunCliente(12345678L)).thenReturn(List.of(ticket));
+
+        List<TicketSoporte> resultado = ticketSoporteService.listarPorCliente(12345678L);
+
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+    }
+
+    @Test
+    void listarPorEstado() {
+        TicketSoporte ticket = TicketSoporte.builder()
+                .idTicket(1L).estadoTicket("ABIERTO").build();
+
+        when(ticketSoporteRepository.findByEstadoTicket("ABIERTO")).thenReturn(List.of(ticket));
+
+        List<TicketSoporte> resultado = ticketSoporteService.listarPorEstado("ABIERTO");
+
+        assertNotNull(resultado);
+        assertEquals(1, resultado.size());
+    }
+
+    @Test
+    void clasificarSolicitud_personalNoEncontrado() {
+        TicketSoporte ticket = TicketSoporte.builder()
+                .idTicket(1L).estadoTicket("ABIERTO").build();
+
+        when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(personalSoporteRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () ->
+            ticketSoporteService.clasificarSolicitud(1L, null, 99L));
     }
 }

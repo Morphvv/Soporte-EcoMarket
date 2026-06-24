@@ -16,6 +16,7 @@ import com.SoporteMicroServicio.SoporteM.dto.MensajeSoporteDTO;
 import com.SoporteMicroServicio.SoporteM.model.MensajeSoporte;
 import com.SoporteMicroServicio.SoporteM.service.MensajeSoporteService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("api/v1/mensajeSoporte")
 @RequiredArgsConstructor
+@Tag(name = "Mensajes de Soporte", description = "Mensajes e intercambio de información dentro de un ticket")
 
 public class MensajeSoporteController {
 

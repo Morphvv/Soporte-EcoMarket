@@ -17,12 +17,14 @@ import com.SoporteMicroServicio.SoporteM.dto.PersonalSoporteDTO;
 import com.SoporteMicroServicio.SoporteM.model.PersonalSoporte;
 import com.SoporteMicroServicio.SoporteM.service.PersonalSoporteService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("api/v1/personalSoporte")
 @RequiredArgsConstructor
+@Tag(name = "Personal de Soporte", description = "Gestión del personal del área de soporte")
 
 public class PersonalSoporteController {
 

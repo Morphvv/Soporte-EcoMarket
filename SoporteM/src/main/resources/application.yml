@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: SoporteM
+  datasource:
+    url: jdbc:mysql://localhost:3306/soporteDB
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+server:
+  port: 8081
+
+usuario:
+  service:
+    url: http://localhost:8080
+
+logging:
+  level:
+    com.SoporteM: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss} %-5level [%logger{0}] - %msg%n"

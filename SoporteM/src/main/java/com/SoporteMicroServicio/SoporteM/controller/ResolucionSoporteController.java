@@ -16,6 +16,7 @@ import com.SoporteMicroServicio.SoporteM.dto.ResolucionSoporteDTO;
 import com.SoporteMicroServicio.SoporteM.model.ResolucionSoporte;
 import com.SoporteMicroServicio.SoporteM.service.ResolucionSoporteService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("api/v1/resolucionSoporte")
 @RequiredArgsConstructor
+@Tag(name = "Resoluciones de Soporte", description = "Registro y modificación de resoluciones de tickets")
 
 public class ResolucionSoporteController {
 
