@@ -2,6 +2,7 @@ package com.SoporteMicroServicio.SoporteM.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,7 +24,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
+@JsonIgnoreProperties({"ticketSoporte", "hibernateLazyInitializer", "handler"})
 public class ResolucionSoporte {
 
     @Id
@@ -46,5 +47,5 @@ public class ResolucionSoporte {
     @JoinColumn(name = "id_ticket", nullable= false, unique= true)
     @ToString.Exclude
     private TicketSoporte ticketSoporte;
-    
+
 }

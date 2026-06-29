@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
         description = "API REST para la gestión de tickets, reclamos y solicitudes de soporte del sistema EcoMarket",
         contact = @Contact(name = "Equipo Soporte", email = "soporte@ecomarket.cl")
     ),
-    servers = @Server(url = "http://localhost:8081", description = "Servidor local")
+    servers = @Server(url = "http://localhost:9004", description = "Servidor local")
 )
 public class OpenApiConfig {
 
