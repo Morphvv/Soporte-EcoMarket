@@ -1,7 +1,6 @@
 package com.SoporteMicroServicio.SoporteM.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.SoporteMicroServicio.SoporteM.dto.CambiarEstadoDTO;
+import com.SoporteMicroServicio.SoporteM.dto.ClasificarTicketDTO;
 import com.SoporteMicroServicio.SoporteM.dto.CrearTicketDTO;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.service.TicketSoporteService;
@@ -82,14 +82,9 @@ public class TicketSoporteController {
     @PutMapping("/clasificar/{idTicket}")
     public ResponseEntity<TicketSoporte> clasificarSolicitud(
             @PathVariable Long idTicket,
-            @RequestBody Map<String, Object> body) {
+            @Valid @RequestBody ClasificarTicketDTO dto) {
 
-        String prioridad = (String) body.get("prioridad");
-        Long idPersonal = body.get("idPersonal") != null
-            ? ((Number) body.get("idPersonal")).longValue()
-            : null;
-
-        return ResponseEntity.ok(ticketSoporteService.clasificarSolicitud(idTicket, prioridad, idPersonal));
+        return ResponseEntity.ok(ticketSoporteService.clasificarSolicitud(idTicket, dto.getPrioridad(), dto.getIdPersonal()));
     }
 
     @Operation(summary = "Cambiar el estado de un ticket")

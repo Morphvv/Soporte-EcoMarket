@@ -2,12 +2,14 @@ package com.SoporteMicroServicio.SoporteM.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.SoporteMicroServicio.SoporteM.dto.SolicitudDevolucionDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.SolicitudDevolucion;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.repository.SolicitudDevolucionRepository;
@@ -24,6 +26,7 @@ public class SolicitudDevolucionService {
 
     private final SolicitudDevolucionRepository solicitudDevolucionRepository;
     private final TicketSoporteRepository ticketSoporteRepository;
+    private final PedidoFeignClient pedidoFeignClient;
 
     public List<SolicitudDevolucion> listarTodos() {
         return solicitudDevolucionRepository.findAll();
@@ -42,6 +45,12 @@ public class SolicitudDevolucionService {
 
         if (solicitudDevolucionRepository.findByTicketSoporteIdTicket(idTicket).isPresent()) {
             throw new BusinessException("El ticket ya tiene una solicitud de devolucion registrada");
+        }
+
+        Map<String, Object> pedido = pedidoFeignClient.obtenerPedidoPorId(dto.getIdPedido());
+        if ("DESCONOCIDO".equals(pedido.get("estado"))) {
+            log.error("No se pudo validar el pedido, id: {}", dto.getIdPedido());
+            throw new BusinessException("No se pudo registrar la solicitud de devolucion: pedido no validado");
         }
 
         SolicitudDevolucion solicitud = SolicitudDevolucion.builder()

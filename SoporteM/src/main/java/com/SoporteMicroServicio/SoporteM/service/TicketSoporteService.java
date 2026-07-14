@@ -10,6 +10,7 @@ import com.SoporteMicroServicio.SoporteM.dto.CambiarEstadoDTO;
 import com.SoporteMicroServicio.SoporteM.dto.CrearTicketDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.feign.UsuarioFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.HistorialEstadoTicket;
 import com.SoporteMicroServicio.SoporteM.model.PersonalSoporte;
@@ -31,6 +32,7 @@ public class TicketSoporteService {
     private final HistorialEstadoTicketRepository historialEstadoTicketRepository;
     private final PersonalSoporteRepository personalSoporteRepository;
     private final UsuarioFeignClient usuarioFeignClient;
+    private final PedidoFeignClient pedidoFeignClient;
 
     public List<TicketSoporte> listarTodosLosTickets() {
         log.debug("Listando todos los tickets de soporte");
@@ -63,6 +65,14 @@ public class TicketSoporteService {
 
         if ("Inactivo".equals(usuario.get("estadoUsuario"))) {
             throw new BusinessException("No se pudo crear el ticket: cliente inactivo");
+        }
+
+        if (dto.getIdPedido() != null) {
+            Map<String, Object> pedido = pedidoFeignClient.obtenerPedidoPorId(dto.getIdPedido());
+            if ("DESCONOCIDO".equals(pedido.get("estado"))) {
+                log.error("No se pudo validar el pedido, id: {}", dto.getIdPedido());
+                throw new BusinessException("No se pudo crear el ticket: pedido no validado");
+            }
         }
 
         TicketSoporte ticket = TicketSoporte.builder()

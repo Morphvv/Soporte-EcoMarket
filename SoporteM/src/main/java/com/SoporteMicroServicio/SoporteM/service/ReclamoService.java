@@ -2,12 +2,14 @@ package com.SoporteMicroServicio.SoporteM.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
 import com.SoporteMicroServicio.SoporteM.dto.ReclamoDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.Reclamo;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.repository.ReclamoRepository;
@@ -24,6 +26,7 @@ public class ReclamoService {
 
     private final ReclamoRepository reclamoRepository;
     private final TicketSoporteRepository ticketSoporteRepository;
+    private final PedidoFeignClient pedidoFeignClient;
 
     public List<Reclamo> listarTodosReclamos() {
         return reclamoRepository.findAll();
@@ -42,6 +45,12 @@ public class ReclamoService {
 
         if (reclamoRepository.findByTicketSoporteIdTicket(idTicket).isPresent()) {
             throw new BusinessException("El ticket ya tiene un reclamo registrado");
+        }
+
+        Map<String, Object> pedido = pedidoFeignClient.obtenerPedidoPorId(dto.getIdPedido());
+        if ("DESCONOCIDO".equals(pedido.get("estado"))) {
+            log.error("No se pudo validar el pedido, id: {}", dto.getIdPedido());
+            throw new BusinessException("No se pudo registrar el reclamo: pedido no validado");
         }
 
         Reclamo reclamo = Reclamo.builder()

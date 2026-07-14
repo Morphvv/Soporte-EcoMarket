@@ -22,6 +22,7 @@ import com.SoporteMicroServicio.SoporteM.dto.CambiarEstadoDTO;
 import com.SoporteMicroServicio.SoporteM.dto.CrearTicketDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.feign.UsuarioFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.HistorialEstadoTicket;
 import com.SoporteMicroServicio.SoporteM.model.PersonalSoporte;
@@ -45,6 +46,9 @@ class TicketSoporteServiceTest {
 
     @Mock
     private UsuarioFeignClient usuarioFeignClient;
+
+    @Mock
+    private PedidoFeignClient pedidoFeignClient;
 
     @InjectMocks
     private TicketSoporteService ticketSoporteService;
@@ -102,10 +106,14 @@ class TicketSoporteServiceTest {
         dto.setTipoSolicitud("RECLAMO");
         dto.setCanal("WEB");
         dto.setPrioridad("ALTA");
+        dto.setIdPedido(10L);
 
         Map<String, Object> usuarioValido = new HashMap<>();
         usuarioValido.put("nombre", "Juan Perez");
         usuarioValido.put("estadoUsuario", "Activo");
+
+        Map<String, Object> pedidoValido = new HashMap<>();
+        pedidoValido.put("estado", "PENDIENTE");
 
         TicketSoporte ticketGuardado = TicketSoporte.builder()
                 .idTicket(1L)
@@ -114,8 +122,9 @@ class TicketSoporteServiceTest {
                 .asunto("Producto dañado")
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-        
+
         when(usuarioFeignClient.obtenerUsuarioPorRut(12345678L)).thenReturn(usuarioValido);
+        when(pedidoFeignClient.obtenerPedidoPorId(10L)).thenReturn(pedidoValido);
         when(ticketSoporteRepository.save(any(TicketSoporte.class))).thenReturn(ticketGuardado);
         when(historialEstadoTicketRepository.save(any(HistorialEstadoTicket.class)))
             .thenReturn(new HistorialEstadoTicket());
@@ -143,6 +152,30 @@ class TicketSoporteServiceTest {
         usuarioNoDisponible.put("nombre", "Usuario no disponible");
 
         when(usuarioFeignClient.obtenerUsuarioPorRut(any(Long.class))).thenReturn(usuarioNoDisponible);
+
+        assertThrows(BusinessException.class, () -> ticketSoporteService.crearTicket(dto));
+    }
+
+    @Test
+    void crearTicket_pedidoNoValidado(){ //Con un pedido no valido o disponible
+        CrearTicketDTO dto = new CrearTicketDTO();
+        dto.setRunCliente(12345678L);
+        dto.setIdPedido(99L);
+        dto.setAsunto("Producto dañado");
+        dto.setDescripcion("El producto llegó completamente roto");
+        dto.setTipoSolicitud("RECLAMO");
+        dto.setCanal("WEB");
+        dto.setPrioridad("ALTA");
+
+        Map<String, Object> usuarioValido = new HashMap<>();
+        usuarioValido.put("nombre", "Juan Perez");
+        usuarioValido.put("estadoUsuario", "Activo");
+
+        Map<String, Object> pedidoNoDisponible = new HashMap<>();
+        pedidoNoDisponible.put("estado", "DESCONOCIDO");
+
+        when(usuarioFeignClient.obtenerUsuarioPorRut(12345678L)).thenReturn(usuarioValido);
+        when(pedidoFeignClient.obtenerPedidoPorId(99L)).thenReturn(pedidoNoDisponible);
 
         assertThrows(BusinessException.class, () -> ticketSoporteService.crearTicket(dto));
     }

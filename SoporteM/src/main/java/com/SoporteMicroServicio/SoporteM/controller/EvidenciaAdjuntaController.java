@@ -16,6 +16,9 @@ import com.SoporteMicroServicio.SoporteM.dto.EvidenciaAdjuntaDTO;
 import com.SoporteMicroServicio.SoporteM.model.EvidenciaAdjunta;
 import com.SoporteMicroServicio.SoporteM.service.EvidenciaAdjuntaService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,21 +32,39 @@ public class EvidenciaAdjuntaController {
 
     private final EvidenciaAdjuntaService evidenciaAdjuntaService;
 
+    @Operation(summary = "Listar evidencias adjuntas de un ticket")
+    @ApiResponse(responseCode = "200", description = "Lista retornada exitosamente")
     @GetMapping("/listar/{idTicket}")
     public ResponseEntity<List<EvidenciaAdjunta>> listarPorIdTicket(@PathVariable Long idTicket) {
         return ResponseEntity.ok(evidenciaAdjuntaService.listarPorIdTicket(idTicket));
     }
 
+    @Operation(summary = "Obtener una evidencia por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Evidencia encontrada"),
+        @ApiResponse(responseCode = "404", description = "Evidencia no existe")
+    })
     @GetMapping("/obtener/{idEvidencia}")
     public ResponseEntity<EvidenciaAdjunta> obtenerEvidenciaPorId(@PathVariable Long idEvidencia) {
         return ResponseEntity.ok(evidenciaAdjuntaService.obtenerEvidenciaPorId(idEvidencia));
     }
 
+    @Operation(summary = "Adjuntar una evidencia a un ticket")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Evidencia adjuntada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @ApiResponse(responseCode = "404", description = "Ticket no encontrado")
+    })
     @PostMapping("/adjuntar/{idTicket}")
     public ResponseEntity<EvidenciaAdjunta> adjuntarEvidencia(@PathVariable Long idTicket, @Valid @RequestBody EvidenciaAdjuntaDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(evidenciaAdjuntaService.adjuntarEvidencia(idTicket, dto));
     }
 
+    @Operation(summary = "Eliminar una evidencia por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Evidencia eliminada"),
+        @ApiResponse(responseCode = "404", description = "Evidencia no encontrada")
+    })
     @DeleteMapping("/eliminar/{idEvidencia}")
     public ResponseEntity<Void> eliminarEvidencia(@PathVariable Long idEvidencia) {
         evidenciaAdjuntaService.eliminarEvidencia(idEvidencia);

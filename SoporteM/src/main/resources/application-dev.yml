@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/SoporteDB
+    username: root
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+usuario:
+  service:
+    url: http://localhost:9090
+
+pedido:
+  service:
+    url: http://localhost:8084

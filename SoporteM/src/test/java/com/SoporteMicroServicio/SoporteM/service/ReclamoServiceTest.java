@@ -1,5 +1,7 @@
 package com.SoporteMicroServicio.SoporteM.service;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.SoporteMicroServicio.SoporteM.dto.ReclamoDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.Reclamo;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.repository.ReclamoRepository;
@@ -29,8 +32,11 @@ class ReclamoServiceTest {
     @Mock
     private ReclamoRepository reclamoRepository;
     
-    @Mock 
+    @Mock
     private TicketSoporteRepository ticketSoporteRepository;
+
+    @Mock
+    private PedidoFeignClient pedidoFeignClient;
 
     @InjectMocks
     private ReclamoService reclamoService;
@@ -81,8 +87,12 @@ class ReclamoServiceTest {
                 .ticketSoporte(ticket)
                 .build();
 
+        Map<String, Object> pedidoValido = new HashMap<>();
+        pedidoValido.put("estado", "PENDIENTE");
+
         when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
         when(reclamoRepository.findByTicketSoporteIdTicket(1l)).thenReturn(Optional.empty());
+        when(pedidoFeignClient.obtenerPedidoPorId(10L)).thenReturn(pedidoValido);
         when(reclamoRepository.save(any(Reclamo.class))).thenReturn(reclamoGuardado);
 
         Reclamo resultado = reclamoService.registrarReclamo(1L, dto);
@@ -90,6 +100,25 @@ class ReclamoServiceTest {
         assertNotNull(resultado);
         assertEquals("EN_REVISION", resultado.getEstadoReclamo());
         verify(reclamoRepository, times(1)).save(any(Reclamo.class));
+    }
+
+    @Test
+    void registrarReclamo_pedidoNoValidado(){
+        TicketSoporte ticket = TicketSoporte.builder().idTicket(1L).estadoTicket("ABIERTO").build();
+        ReclamoDTO dto = new ReclamoDTO();
+        dto.setIdPedido(99L);
+        dto.setIdProducto(20L);
+        dto.setMotivo("Producto defectuoso");
+        dto.setDescripcion("El producto llegó roto");
+
+        Map<String, Object> pedidoNoDisponible = new HashMap<>();
+        pedidoNoDisponible.put("estado", "DESCONOCIDO");
+
+        when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(reclamoRepository.findByTicketSoporteIdTicket(1L)).thenReturn(Optional.empty());
+        when(pedidoFeignClient.obtenerPedidoPorId(99L)).thenReturn(pedidoNoDisponible);
+
+        assertThrows(BusinessException.class, () -> reclamoService.registrarReclamo(1L, dto));
     }
 
     @Test

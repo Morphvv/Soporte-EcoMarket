@@ -5,6 +5,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.feign.UsuarioFeignClient;
 
 @SpringBootTest
@@ -13,6 +14,9 @@ class SoporteMApplicationTests {
 
 	@MockitoBean
 	private UsuarioFeignClient usuarioFeignClient;
+
+	@MockitoBean
+	private PedidoFeignClient pedidoFeignClient;
 
 	@Test
 	void contextLoads() {

@@ -1,5 +1,7 @@
 package com.SoporteMicroServicio.SoporteM.service;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.SoporteMicroServicio.SoporteM.dto.SolicitudDevolucionDTO;
 import com.SoporteMicroServicio.SoporteM.exception.BusinessException;
 import com.SoporteMicroServicio.SoporteM.exception.ResourceNotFoundException;
+import com.SoporteMicroServicio.SoporteM.feign.PedidoFeignClient;
 import com.SoporteMicroServicio.SoporteM.model.SolicitudDevolucion;
 import com.SoporteMicroServicio.SoporteM.model.TicketSoporte;
 import com.SoporteMicroServicio.SoporteM.repository.SolicitudDevolucionRepository;
@@ -31,6 +34,9 @@ class SolicitudDevolucionServiceTest {
 
     @Mock
     private TicketSoporteRepository ticketSoporteRepository;
+
+    @Mock
+    private PedidoFeignClient pedidoFeignClient;
 
     @InjectMocks
     private SolicitudDevolucionService solicitudDevolucionService;
@@ -79,8 +85,12 @@ class SolicitudDevolucionServiceTest {
         SolicitudDevolucion guardada = SolicitudDevolucion.builder()
                 .idSolicitudD(1L).estadoSolicitud("PENDIENTE").ticketSoporte(ticket).build();
 
+        Map<String, Object> pedidoValido = new HashMap<>();
+        pedidoValido.put("estado", "PENDIENTE");
+
         when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
         when(solicitudDevolucionRepository.findByTicketSoporteIdTicket(1L)).thenReturn(Optional.empty());
+        when(pedidoFeignClient.obtenerPedidoPorId(10L)).thenReturn(pedidoValido);
         when(solicitudDevolucionRepository.save(any(SolicitudDevolucion.class))).thenReturn(guardada);
 
         SolicitudDevolucion resultado = solicitudDevolucionService.registrarSolicitud(1L, dto);
@@ -88,6 +98,25 @@ class SolicitudDevolucionServiceTest {
         assertNotNull(resultado);
         assertEquals("PENDIENTE", resultado.getEstadoSolicitud());
         verify(solicitudDevolucionRepository, times(1)).save(any(SolicitudDevolucion.class));
+    }
+
+    @Test
+    void registrarSolicitud_pedidoNoValidado(){
+        TicketSoporte ticket = TicketSoporte.builder().idTicket(1L).estadoTicket("ABIERTO").build();
+        SolicitudDevolucionDTO dto = new SolicitudDevolucionDTO();
+        dto.setIdPedido(99L);
+        dto.setIdProducto(20L);
+        dto.setCantidad(2);
+        dto.setMotivo("Producto defectuoso recibido");
+
+        Map<String, Object> pedidoNoDisponible = new HashMap<>();
+        pedidoNoDisponible.put("estado", "DESCONOCIDO");
+
+        when(ticketSoporteRepository.findById(1L)).thenReturn(Optional.of(ticket));
+        when(solicitudDevolucionRepository.findByTicketSoporteIdTicket(1L)).thenReturn(Optional.empty());
+        when(pedidoFeignClient.obtenerPedidoPorId(99L)).thenReturn(pedidoNoDisponible);
+
+        assertThrows(BusinessException.class, () -> solicitudDevolucionService.registrarSolicitud(1L, dto));
     }
 
     @Test
